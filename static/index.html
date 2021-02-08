@@ -1,0 +1,105 @@
+<html lang="en">
+<head>
+
+</head>
+
+<body>
+  <div id="app">
+	<div id="container" style="width: 75%;">
+		<canvas id="canvas"></canvas>
+	</div>
+	<input id="searchbar" />
+  </div>
+</body>
+<script>
+const searchbar = document.getElementById("searchbar");
+const container = document.getElementById("container");
+const app = document.getElementById("app");
+const context = document.getElementById('canvas').getContext('2d');
+
+async function loadData(actorname) {
+	// Display Loading message
+	context.fillStyle = 'green';
+	context.fillRect(10, 10, 150, 100);
+	// Make the API call
+	var data;
+	try {
+		data = await getData(actorname);
+	} catch (error) {
+        alert("err cauhgt:");
+        alert(error);
+		data = { success : 0 };
+	}
+	// Render on completion
+	if (data.success === 1) {
+		context.clearRect(0, 0, canvas.width, canvas.height);
+		renderChart(data);
+	} else {
+		context.clearRect(0, 0, canvas.width, canvas.height);
+		context.fillStyle = 'red';
+		context.fillRect(10, 10, 150, 100);
+	}
+}
+
+async function getData(actorname) {
+	
+	//request the data
+	const base_string = "http://localhost:5000/actor"
+	
+	response_data = await fetch(base_string, {
+		method: 'POST',
+		mode: 'same-origin',
+		cache: 'no-cache',
+		credentials: 'same-origin',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({'actorname':actorname})
+	});
+
+    d = await response_data.json();
+    d.success = 1;
+	return d;
+}
+
+function renderChart(respdata) {
+	
+	
+	//then fill the data structure
+	var barChartData = {
+		labels: respdata.years,
+		datasets: [{
+			backgroundColor: '#0080FF80',
+			borderWidth: 1,
+			data: respdata.pop,
+		}]
+
+	};
+	
+	window.actorGraph = new Chart(context, {
+		type: 'bar',
+		data: barChartData,
+		options: {
+			responsive: true,
+			legend: {
+				display: false
+			},
+			tooltips: {
+				callbacks: {
+					label: function(tooltipItem) { return tooltipItem.yLabel; }
+				}
+			},
+		}
+	});
+}
+
+searchbar.addEventListener('keyup', ({key}) => {
+	if (key === "Enter")
+		loadData(searchbar.value)
+});
+
+//alert("hello");
+</script>
+<script src="https://www.chartjs.org/samples/latest/utils.js"></script>
+<script src="https://www.chartjs.org/dist/2.9.4/Chart.min.js"></script>
+</html>
