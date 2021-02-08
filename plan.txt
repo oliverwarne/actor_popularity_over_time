@@ -1,0 +1,58 @@
+Goal:
+    Look at a popularity over time graph (correct or incorrect) for actors.
+
+Approach:
+
+    Components:
+        gobetween: Server to expose API that provides data about actor to user
+        display: Web page to respond to display data and provide a search for actor
+
+        OMDb: An external API that provides the data
+
+    Flow from user perspective:
+        User types whole of actor name, presses enter/search
+            upon success, a chart is displayed
+            upon failure, error note is displayed
+
+    Flow component-wise:
+        Server delivers display to client connection
+
+        Client connection sends a query with actor name
+            if actor name not valid, reply with error code
+
+        On correct actor name, server queries OMDb with actorid
+            if response is invalid/can't reach server, reply with error code
+
+        Server parses OMDb response into simple datastructure
+
+        Server returns parsed data to client
+
+        client displays graph
+
+
+    Server components:
+        endpoints:
+            GET /index
+                Reply with display
+
+            POST /actor/
+                body: actorname
+                Search actor map for actorname
+                    Not found: reply with error code
+                    On match: query OMDb with actorid
+        functions:
+            fn search_actor_map(actorname):
+                return actorid if found otherwise return False
+
+            fn query_omdb(id)
+                query omdb, return whole response if success, otherwise False
+
+            fn parse_omdb(response)
+                calculate their popularity for each year they produced movies in
+                iterate throgh each year, accumulating their popularity
+
+                return 
+                    keys, a list of years
+                    values, the corresponding popularity value for each year
+
+
